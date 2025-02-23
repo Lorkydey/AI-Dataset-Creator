@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="black">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UiFast Staff Only - Dataset Creator</title>
+  <!-- Tailwind CSS et DaisyUI via CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.23/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Pour s'assurer que le fond est noir dans le thème black */
+    body { background-color: #000; }
+  </style>
+</head>
+<div role="alert" class="alert alert-error">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    class="h-6 w-6 shrink-0 stroke-current"
+    fill="none"
+    viewBox="0 0 24 24">
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+  <span><b>This software is ONLY for UiFast staff. Unauthorized distribution is strictly prohibited.</b></span>
+</div>
+<body class="min-h-screen">
+  <!-- Alerte Warning -->
+  
+
+  <div class="container mx-auto my-8 p-6 bg-base-100 rounded-lg shadow-xl">
+    <h1 class="text-3xl font-bold text-center mb-6"><b>DTSM</b> <span class="text-xs">by</span> <span class="text-lg">UiFast</span></h1>
+    
+    <!-- Section Principale : Formulaires et Statistiques -->
+    <div class="space-y-8">
+      <!-- Card : Add Example -->
+      <div id="example-form" class="card bg-base-200 rounded-2xl shadow-md">
+        <div class="card-body">
+          <h2 class="card-title text-2xl">Add an Example</h2>
+          <form id="addExampleForm" class="space-y-4">
+            <div class="form-control">
+              <label for="prompt" class="label">
+                <span class="label-text font-semibold">Prompt:</span>
+              </label>
+              <textarea id="prompt" rows="3" class="textarea textarea-accent rounded-xl" placeholder="Enter the prompt" required></textarea>
+            </div>
+            <div class="form-control">
+              <label for="completion" class="label">
+                <span class="label-text font-semibold">Result / Completion:</span>
+              </label>
+              <textarea id="completion" rows="3" class="textarea textarea-accent rounded-xl" placeholder="Enter the completion" required></textarea>
+            </div>
+            <div class="form-control">
+              <label for="categorySelect" class="label">
+                <span class="label-text font-semibold">Category:</span>
+              </label>
+              <select id="categorySelect" class="select select-bordered rounded-xl" required></select>
+            </div>
+            <button type="submit" class="btn btn-primary rounded-2xl w-full">Add Example</button>
+          </form>
+        </div>
+      </div> 
+
+      <!-- Card : Statistics -->
+      <div id="statistics" class="card bg-base-200 rounded-2xl shadow-md">
+        <div class="card-body">
+          <h2 class="card-title text-2xl">Statistics</h2>
+          <div id="statsContainer" class="flex flex-wrap gap-4 justify-center">
+            <div class="stat card bg-base-100 shadow-lg">
+              <div class="stat-title">Total Examples</div>
+              <div class="stat-value" id="totalCount">0</div>
+            </div>
+            <!-- Cartes de catégories ajoutées dynamiquement -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Card : Create New Category -->
+      <div id="category-creation" class="card bg-base-200 rounded-2xl shadow-md">
+        <div class="card-body">
+          <h2 class="card-title text-2xl">Create a New Category</h2>
+          <form id="addCategoryForm" class="space-y-4">
+            <div class="form-control">
+              <label for="newCategory" class="label">
+                <span class="label-text font-semibold">Category Name:</span>
+              </label>
+              <input type="text" id="newCategory" class="input input-bordered rounded-xl" placeholder="Enter new category" required>
+            </div>
+            <button type="submit" class="btn btn-secondary w-full rounded-2xl">Add Category</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bouton de bascule pour afficher les Dataset Examples -->
+    <div class="text-center my-8">
+      <button id="toggleDatasetBtn" class="btn btn-info rounded-full">Show Dataset Examples</button>
+    </div>
+
+    <!-- Section : Dataset Examples -->
+    <div id="dataset-list" class="card bg-base-200 rounded-2xl shadow-xl p-6 hidden">
+      <div class="card-body">
+        <h2 class="card-title text-3xl text-center mb-6">Dataset Examples</h2>
+        <div class="overflow-x-auto">
+          <table class="table w-full">
+            <thead>
+              <tr>
+                <th>Prompt (Category &amp; Date)</th>
+                <th>Completion</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="examplesTable">
+              <!-- Les exemples seront insérés ici -->
+            </tbody>
+          </table>
+        </div>
+        <!-- Contrôles de Pagination -->
+        <div id="paginationControls" class="btn-group justify-center mt-4"></div>
+      </div>
+    </div>
+
+    <!-- Section : Database Management -->
+    <div id="database" class="card bg-base-200 rounded-2xl shadow-md p-6 mt-8">
+      <div class="card-body">
+        <h2 class="card-title text-2xl">Database Management</h2>
+        <div class="flex flex-wrap gap-4 justify-center">
+          <button id="openDBBtn" class="btn btn-outline rounded-xl">Open / Create Database</button>
+          <button id="saveDBBtn" class="btn btn-outline rounded-xl">Save Database</button>
+        </div>
+        <p id="dbStatus" class="mt-4 text-center"></p>
+      </div>
+    </div>
+
+    <!-- Section : Export Dataset -->
+    <div id="export" class="card bg-base-200 shadow-md rounded-2xl p-6 mt-8">
+      <div class="card-body">
+        <h2 class="card-title text-2xl">Export Dataset (JSONL)</h2>
+        <div class="text-center">
+          <button id="exportBtn" class="btn btn-warning rounded-2xl">Export JSONL</button>
+        </div>
+        <pre id="exportedData" class="mt-4 p-4 bg-gray-800 text-white rounded hidden"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Variables globales pour le dataset, catégories et pagination
+    let dataset = [];
+    let categories = ["default"];
+    let dbFileHandle = null;
+    let datasetVisible = false;
+    let currentPage = 1;
+    const itemsPerPage = 10;
+
+    // Mise à jour du menu déroulant des catégories
+    function updateCategorySelect() {
+      const select = document.getElementById('categorySelect');
+      select.innerHTML = '';
+      categories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat;
+        option.textContent = cat;
+        select.appendChild(option);
+      });
+    }
+
+    // Mise à jour des statistiques sous forme de cartes
+    function updateStatistics() {
+      document.getElementById('totalCount').textContent = dataset.length;
+      const statsContainer = document.getElementById('statsContainer');
+      // Reconstruction complète
+      statsContainer.innerHTML = `
+        <div class="stat card bg-base-100 shadow-lg">
+          <div class="stat-title">Total Examples</div>
+          <div class="stat-value" id="totalCount">${dataset.length}</div>
+        </div>
+      `;
+      categories.forEach(cat => {
+        const count = dataset.filter(item => item.category === cat).length;
+        const card = document.createElement('div');
+        card.className = 'stat card bg-base-100 shadow-lg';
+        card.innerHTML = `
+          <div class="stat-title">${cat}</div>
+          <div class="stat-value">${count}</div>
+        `;
+        statsContainer.innerHTML += card.outerHTML;
+      });
+    }
+
+    // Mise à jour du tableau des Dataset Examples avec pagination
+    function updateDatasetTable() {
+      const tableBody = document.getElementById('examplesTable');
+      tableBody.innerHTML = '';
+      // Déterminer la tranche à afficher
+      const start = (currentPage - 1) * itemsPerPage;
+      const pageData = dataset.slice(start, start + itemsPerPage);
+      pageData.forEach(item => {
+        const tr = document.createElement('tr');
+        // Colonne Prompt (avec catégorie et date)
+        const tdPrompt = document.createElement('td');
+        tdPrompt.innerHTML = `
+          <div class="font-bold">${item.prompt}</div>
+          <div class="text-sm text-gray-400">Category: ${item.category}</div>
+          <div class="text-xs text-gray-500">Added on: ${item.date}</div>
+        `;
+        // Colonne Completion
+        const tdCompletion = document.createElement('td');
+        tdCompletion.textContent = item.completion;
+        // Colonne Action : bouton pour supprimer (icône poubelle)
+        const tdAction = document.createElement('td');
+        const delBtn = document.createElement('button');
+        delBtn.className = "btn btn-error btn-circle";
+        delBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" 
+          viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" 
+          stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 
+          21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M8 7V4a1 1 0 011-1h6a1 
+          1 0 011 1v3" /></svg>`;
+        delBtn.addEventListener('click', () => {
+          // Supprimer l'élément de dataset et mettre à jour
+          const globalIndex = dataset.indexOf(item);
+          if (globalIndex > -1) {
+            dataset.splice(globalIndex, 1);
+            // Si la page actuelle est trop élevée, revenir à la page précédente
+            const totalPages = Math.ceil(dataset.length / itemsPerPage);
+            if (currentPage > totalPages) {
+              currentPage = totalPages;
+            }
+            updateDatasetTable();
+            updateStatistics();
+            updatePagination();
+            updateCategorySelect();
+          }
+        });
+        tdAction.appendChild(delBtn);
+        tr.appendChild(tdPrompt);
+        tr.appendChild(tdCompletion);
+        tr.appendChild(tdAction);
+        tableBody.appendChild(tr);
+      });
+    }
+
+    // Mise à jour des contrôles de pagination
+    function updatePagination() {
+      const pagination = document.getElementById('paginationControls');
+      pagination.innerHTML = '';
+      const totalPages = Math.ceil(dataset.length / itemsPerPage) || 1;
+      for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.className = "btn btn-sm";
+        if (i === currentPage) {
+          btn.classList.add("btn-active");
+        }
+        btn.textContent = i;
+        btn.addEventListener('click', () => {
+          currentPage = i;
+          updateDatasetTable();
+          updatePagination();
+        });
+        pagination.appendChild(btn);
+      }
+    }
+
+    // Bascule l'affichage de la section Dataset Examples
+    function toggleDatasetExamples() {
+      datasetVisible = !datasetVisible;
+      const datasetSection = document.getElementById('dataset-list');
+      const btn = document.getElementById('toggleDatasetBtn');
+      if (datasetVisible) {
+        datasetSection.classList.remove('hidden');
+        btn.textContent = "Hide Dataset Examples";
+        updatePagination();
+      } else {
+        datasetSection.classList.add('hidden');
+        btn.textContent = "Show Dataset Examples";
+      }
+    }
+
+    // Sauvegarde de la base de données dans un fichier TXT (format JSONL)
+    async function saveDatabaseToFile() {
+      if (!dbFileHandle) {
+        document.getElementById("dbStatus").textContent = "Database not open. Click 'Open / Create Database'.";
+        return;
+      }
+      const txtContent = dataset.map(item => JSON.stringify({
+        prompt: item.prompt,
+        completion: item.completion,
+        category: item.category,
+        date: item.date
+      })).join("\n");
+      try {
+        const writable = await dbFileHandle.createWritable();
+        await writable.write(txtContent);
+        await writable.close();
+        document.getElementById("dbStatus").textContent = "Database saved successfully.";
+      } catch (err) {
+        console.error(err);
+        document.getElementById("dbStatus").textContent = "Error saving the database.";
+      }
+    }
+
+    // Ouverture ou création de la base de données via l'API File System Access
+    async function openOrCreateDatabase() {
+      try {
+        const openExisting = confirm("Do you want to open an existing file?\n\nOK: Open existing file\nCancel: Create new database");
+        if (openExisting) {
+          const [handle] = await window.showOpenFilePicker({
+            types: [{
+              description: 'Text Files',
+              accept: { 'text/plain': ['.txt'] }
+            }],
+            multiple: false
+          });
+          dbFileHandle = handle;
+          const file = await handle.getFile();
+          const content = await file.text();
+          if (content.trim() !== "") {
+            const lines = content.split("\n");
+            dataset = lines.map(line => {
+              try {
+                return JSON.parse(line);
+              } catch (e) {
+                return null;
+              }
+            }).filter(item => item !== null);
+            const importedCategories = new Set();
+            dataset.forEach(item => {
+              if (item.category) importedCategories.add(item.category);
+            });
+            categories = Array.from(importedCategories);
+            if (categories.length === 0) categories.push("default");
+          } else {
+            dataset = [];
+          }
+          document.getElementById("dbStatus").textContent = "Database opened: " + dbFileHandle.name;
+          updateCategorySelect();
+          updateStatistics();
+          updateDatasetTable();
+          updatePagination();
+        } else {
+          dbFileHandle = await window.showSaveFilePicker({
+            suggestedName: 'uiFast_dataset.txt',
+            types: [{
+              description: 'Text Files',
+              accept: { 'text/plain': ['.txt'] }
+            }]
+          });
+          dataset = [];
+          document.getElementById("dbStatus").textContent = "New database created: " + dbFileHandle.name;
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById("dbStatus").textContent = "Error opening or creating the database.";
+      }
+    }
+
+    // Gestion de la soumission du formulaire "Add Example" (avec date d'ajout)
+    document.getElementById('addExampleForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const prompt = document.getElementById('prompt').value.trim();
+      const completion = document.getElementById('completion').value.trim();
+      const category = document.getElementById('categorySelect').value;
+      if (prompt && completion && category) {
+        const date = new Date().toLocaleString();
+        dataset.push({ prompt, completion, category, date });
+        updateDatasetTable();
+        updateStatistics();
+        updatePagination();
+        saveDatabaseToFile();
+        document.getElementById('prompt').value = '';
+        document.getElementById('completion').value = '';
+      }
+    });
+
+    // Gestion de la soumission du formulaire "Add Category"
+    document.getElementById('addCategoryForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const newCat = document.getElementById('newCategory').value.trim();
+      if (newCat && !categories.includes(newCat)) {
+        categories.push(newCat);
+        updateCategorySelect();
+        updateStatistics();
+        document.getElementById('newCategory').value = '';
+      }
+    });
+
+    // Boutons de gestion de la base de données et export
+    document.getElementById('openDBBtn').addEventListener('click', openOrCreateDatabase);
+    document.getElementById('saveDBBtn').addEventListener('click', saveDatabaseToFile);
+
+    document.getElementById('exportBtn').addEventListener('click', function() {
+      const jsonl = dataset.map(item => JSON.stringify({
+        prompt: item.prompt,
+        completion: item.completion,
+        category: item.category,
+        date: item.date
+      })).join("\n");
+      const exportedPre = document.getElementById('exportedData');
+      exportedPre.textContent = jsonl;
+      exportedPre.classList.remove('hidden');
+      
+      const blob = new Blob([jsonl], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'uiFast_dataset.jsonl';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    // Initialisation au chargement
+    window.addEventListener('load', function() {
+      updateCategorySelect();
+      updateStatistics();
+      updateDatasetTable();
+      updatePagination();
+      document.getElementById('toggleDatasetBtn').addEventListener('click', toggleDatasetExamples);
+    });
+  </script>
+</body>
+</html>
