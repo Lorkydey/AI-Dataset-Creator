@@ -4,11 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>UiFast Staff Only - Dataset Creator</title>
-  <!-- Tailwind CSS et DaisyUI via CDN -->
   <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.23/dist/full.min.css" rel="stylesheet" type="text/css" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Pour s'assurer que le fond est noir dans le thème black */
     body { background-color: #000; }
   </style>
 </head>
@@ -27,15 +25,12 @@
   <span><b>This software is ONLY for UiFast staff. Unauthorized distribution is strictly prohibited.</b></span>
 </div>
 <body class="min-h-screen">
-  <!-- Alerte Warning -->
   
 
   <div class="container mx-auto my-8 p-6 bg-base-100 rounded-lg shadow-xl">
     <h1 class="text-3xl font-bold text-center mb-6"><b>DTSM</b> <span class="text-xs">by</span> <span class="text-lg">UiFast</span></h1>
-    
-    <!-- Section Principale : Formulaires et Statistiques -->
+
     <div class="space-y-8">
-      <!-- Card : Add Example -->
       <div id="example-form" class="card bg-base-200 rounded-2xl shadow-md">
         <div class="card-body">
           <h2 class="card-title text-2xl">Add an Example</h2>
@@ -63,7 +58,6 @@
         </div>
       </div> 
 
-      <!-- Card : Statistics -->
       <div id="statistics" class="card bg-base-200 rounded-2xl shadow-md">
         <div class="card-body">
           <h2 class="card-title text-2xl">Statistics</h2>
@@ -72,12 +66,10 @@
               <div class="stat-title">Total Examples</div>
               <div class="stat-value" id="totalCount">0</div>
             </div>
-            <!-- Cartes de catégories ajoutées dynamiquement -->
           </div>
         </div>
       </div>
 
-      <!-- Card : Create New Category -->
       <div id="category-creation" class="card bg-base-200 rounded-2xl shadow-md">
         <div class="card-body">
           <h2 class="card-title text-2xl">Create a New Category</h2>
@@ -94,12 +86,10 @@
       </div>
     </div>
 
-    <!-- Bouton de bascule pour afficher les Dataset Examples -->
     <div class="text-center my-8">
       <button id="toggleDatasetBtn" class="btn btn-info rounded-full">Show Dataset Examples</button>
     </div>
 
-    <!-- Section : Dataset Examples -->
     <div id="dataset-list" class="card bg-base-200 rounded-2xl shadow-xl p-6 hidden">
       <div class="card-body">
         <h2 class="card-title text-3xl text-center mb-6">Dataset Examples</h2>
@@ -113,16 +103,13 @@
               </tr>
             </thead>
             <tbody id="examplesTable">
-              <!-- Les exemples seront insérés ici -->
             </tbody>
           </table>
         </div>
-        <!-- Contrôles de Pagination -->
         <div id="paginationControls" class="btn-group justify-center mt-4"></div>
       </div>
     </div>
 
-    <!-- Section : Database Management -->
     <div id="database" class="card bg-base-200 rounded-2xl shadow-md p-6 mt-8">
       <div class="card-body">
         <h2 class="card-title text-2xl">Database Management</h2>
@@ -134,7 +121,6 @@
       </div>
     </div>
 
-    <!-- Section : Export Dataset -->
     <div id="export" class="card bg-base-200 shadow-md rounded-2xl p-6 mt-8">
       <div class="card-body">
         <h2 class="card-title text-2xl">Export Dataset (JSONL)</h2>
@@ -147,7 +133,6 @@
   </div>
 
   <script>
-    // Variables globales pour le dataset, catégories et pagination
     let dataset = [];
     let categories = ["default"];
     let dbFileHandle = null;
@@ -155,7 +140,6 @@
     let currentPage = 1;
     const itemsPerPage = 10;
 
-    // Mise à jour du menu déroulant des catégories
     function updateCategorySelect() {
       const select = document.getElementById('categorySelect');
       select.innerHTML = '';
@@ -167,11 +151,9 @@
       });
     }
 
-    // Mise à jour des statistiques sous forme de cartes
     function updateStatistics() {
       document.getElementById('totalCount').textContent = dataset.length;
       const statsContainer = document.getElementById('statsContainer');
-      // Reconstruction complète
       statsContainer.innerHTML = `
         <div class="stat card bg-base-100 shadow-lg">
           <div class="stat-title">Total Examples</div>
@@ -190,26 +172,21 @@
       });
     }
 
-    // Mise à jour du tableau des Dataset Examples avec pagination
     function updateDatasetTable() {
       const tableBody = document.getElementById('examplesTable');
       tableBody.innerHTML = '';
-      // Déterminer la tranche à afficher
       const start = (currentPage - 1) * itemsPerPage;
       const pageData = dataset.slice(start, start + itemsPerPage);
       pageData.forEach(item => {
         const tr = document.createElement('tr');
-        // Colonne Prompt (avec catégorie et date)
         const tdPrompt = document.createElement('td');
         tdPrompt.innerHTML = `
           <div class="font-bold">${item.prompt}</div>
           <div class="text-sm text-gray-400">Category: ${item.category}</div>
           <div class="text-xs text-gray-500">Added on: ${item.date}</div>
         `;
-        // Colonne Completion
         const tdCompletion = document.createElement('td');
         tdCompletion.textContent = item.completion;
-        // Colonne Action : bouton pour supprimer (icône poubelle)
         const tdAction = document.createElement('td');
         const delBtn = document.createElement('button');
         delBtn.className = "btn btn-error btn-circle";
@@ -219,11 +196,9 @@
           21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M8 7V4a1 1 0 011-1h6a1 
           1 0 011 1v3" /></svg>`;
         delBtn.addEventListener('click', () => {
-          // Supprimer l'élément de dataset et mettre à jour
           const globalIndex = dataset.indexOf(item);
           if (globalIndex > -1) {
             dataset.splice(globalIndex, 1);
-            // Si la page actuelle est trop élevée, revenir à la page précédente
             const totalPages = Math.ceil(dataset.length / itemsPerPage);
             if (currentPage > totalPages) {
               currentPage = totalPages;
@@ -242,7 +217,6 @@
       });
     }
 
-    // Mise à jour des contrôles de pagination
     function updatePagination() {
       const pagination = document.getElementById('paginationControls');
       pagination.innerHTML = '';
@@ -263,7 +237,6 @@
       }
     }
 
-    // Bascule l'affichage de la section Dataset Examples
     function toggleDatasetExamples() {
       datasetVisible = !datasetVisible;
       const datasetSection = document.getElementById('dataset-list');
@@ -278,7 +251,6 @@
       }
     }
 
-    // Sauvegarde de la base de données dans un fichier TXT (format JSONL)
     async function saveDatabaseToFile() {
       if (!dbFileHandle) {
         document.getElementById("dbStatus").textContent = "Database not open. Click 'Open / Create Database'.";
@@ -301,7 +273,6 @@
       }
     }
 
-    // Ouverture ou création de la base de données via l'API File System Access
     async function openOrCreateDatabase() {
       try {
         const openExisting = confirm("Do you want to open an existing file?\n\nOK: Open existing file\nCancel: Create new database");
@@ -356,7 +327,6 @@
       }
     }
 
-    // Gestion de la soumission du formulaire "Add Example" (avec date d'ajout)
     document.getElementById('addExampleForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const prompt = document.getElementById('prompt').value.trim();
@@ -374,7 +344,6 @@
       }
     });
 
-    // Gestion de la soumission du formulaire "Add Category"
     document.getElementById('addCategoryForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const newCat = document.getElementById('newCategory').value.trim();
@@ -386,7 +355,6 @@
       }
     });
 
-    // Boutons de gestion de la base de données et export
     document.getElementById('openDBBtn').addEventListener('click', openOrCreateDatabase);
     document.getElementById('saveDBBtn').addEventListener('click', saveDatabaseToFile);
 
@@ -412,7 +380,6 @@
       URL.revokeObjectURL(url);
     });
 
-    // Initialisation au chargement
     window.addEventListener('load', function() {
       updateCategorySelect();
       updateStatistics();
